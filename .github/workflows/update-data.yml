@@ -1,0 +1,39 @@
+name: Update location data
+
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependency
+        run: python -m pip install httpx
+
+      - name: Fetch latest locations
+        run: python -c 'import os; from data_pull import pull_data; pull_data(os.environ["DAMNLINES_API_TOKEN"])'
+        env:
+          DAMNLINES_API_TOKEN: ${{ secrets.DAMNLINES_API_TOKEN }}
+
+      - name: Commit updated data
+        run: |
+          git add datapull.json
+          if git diff --cached --quiet; then
+            echo "Location data has not changed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update location data"
+          git push
