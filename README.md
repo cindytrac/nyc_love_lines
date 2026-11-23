@@ -1,4 +1,4 @@
-# NYC Loves Line
+# NYC Loves Lines
 
 🗺️ #30DayMapChallenge Day 2 - Lines!
 
